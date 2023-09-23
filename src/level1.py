@@ -102,7 +102,7 @@ def main():
     with settings.expander('Settings'):
         max_bound = st.select_slider(
             'Set Range Max',
-            options = [i for i in range(4,11)],
+            options = [i for i in range(4,20)],
             value=10,
             key='bound',
             on_change=restart,

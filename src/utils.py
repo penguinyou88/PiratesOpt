@@ -144,6 +144,6 @@ def return_scaling(x_true,N):
 # function evaluation
 def func(x, x_true, N, min_dist, max_dist):
     x = torch.round(x)
-    f = (0 - N**2-1)/(max_dist - min_dist) * (distance(x, x_true) - min_dist) + N**2-1
+    f = (0 - 99)/(max_dist - min_dist) * (distance(x, x_true) - min_dist) + 99
     
     return torch.round(f)

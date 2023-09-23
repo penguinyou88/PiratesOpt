@@ -10,17 +10,18 @@ def main():
 
         ---
 
-        #### About
+        #### About the Game
 
-        Click the play button to begin the game!
+        Click the "Treasure Hunt Game" button to begin play the game! 
 
-        Thomas Bayes, the [multi-armed] bandit is has a special tresure locator, and is looking for a tresure. 
+        Thomas Bayes, the multi-armed bandit has a special treasure locator, given enough clues, he can find the biggest treasure (💠). 
         
-        Using your scientific prowess, you were able to make this tresure locatoator too!
+        Using your scientific power, you will be able to find the largest diamond too!
 
-        Can you reach the tresure before Thomas Bayes does?
+        Can you find the bigger 💠 than what Thomas Bayes finds?
 
         There are 2 levels of the game, come and try it out and see if you can beat him at both levels!
+        
         ''',
         unsafe_allow_html=True,
     )

@@ -70,7 +70,7 @@ def main():
         # project, about, contact = st.columns([1.1, 1, 1])
 
         if not st.session_state.project:
-            st.sidebar.button('📌 Treasure Hunt Game', on_click=change_button)
+            st.sidebar.button('🏴‍☠️ Treasure Hunt Game', on_click=change_button)
         else:
             st.sidebar.button('🏠 Homepage', on_click=set_page, args=('Homepage', True))
 
