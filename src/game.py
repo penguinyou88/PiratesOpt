@@ -10,6 +10,8 @@ def init(bound: int = 10, post_init=False):
     if not post_init:
         st.session_state.win = 0
         st.session_state.clicklist = []
+        st.session_state.BOlist= []
+        st.session_state.initlist = []
         st.session_state.numberlist = {}
     st.session_state.tries = 0
     st.session_state.init_flag = True
@@ -17,7 +19,7 @@ def init(bound: int = 10, post_init=False):
 
 def restart():
     for key in st.session_state.keys():
-        if [x in key for x in [',','status']].any():
+        if bool([x for x in [',','status'] if x in key]):
             del st.session_state[key]
     init()
 
@@ -39,12 +41,15 @@ def update_BO_guess(x_new_usr,y_new_usr,x_train_bo,x_train_usr,y_train_bo,y_trai
     st.session_state.y_train_bo = y_train_bo
     st.session_state.y_train_usr = y_train_usr
 
+    x_new_bo = x_new_bo.squeeze().detach().numpy()
+    st.session_state.BOlist.append(str(int(x_new_bo[0]))+','+str(int(x_new_bo[1])))
+
 
 def change_icon(key, x_true, bounds, max_bound, min_dist, max_dist,x_train_bo,x_train_usr,y_train_bo,y_train_usr,func):
     st.session_state.tries+=1
     st.session_state[key+'_status']=True # indicating this location is being clicked already
     i,j = key.split(',')
-    st.session_state.clicklist.append((i,j))
+    st.session_state.clicklist.append(key)
     x_new_usr = torch.tensor([int(i),int(j)]).reshape(1,2)
     f = func(x_new_usr, x_true, max_bound, min_dist, max_dist)
     st.session_state.numberlist[key]=int(f.detach().numpy())
@@ -81,6 +86,7 @@ def initialize_game(max_bound, func, n_init=3):
         key = str(i)+','+str(j)
         st.session_state[key+'_status']=True
         st.session_state.numberlist[key]=int(y)
+        st.session_state.initlist.append(key)
 
     return x_train_bo,x_train_usr,y_train_bo,y_train_usr,x_true,bounds, min_dist, max_dist
 
@@ -159,11 +165,31 @@ def main(level='level1'):
             for j in range(max_bound):
                 key = str(i+1)+','+str(j+1)
                 click_button[key] = st.empty()
-                if key+'_status' in st.session_state:
-                    fvalue = st.session_state.numberlist[key]
-                    click_button[key].button(':red['+str(fvalue)+']', disabled=True, key=key)
+                # when budget used
+                if st.session_state.tries==budget:
+                    x_input = torch.tensor([int(i+1),int(j+1)]).reshape(1,2)
+                    fvalue = func(x_input, x_true, max_bound, min_dist, max_dist)
+                    fvalue = int(fvalue.detach().numpy())
+                    if (key in st.session_state.clicklist) & (key in st.session_state.BOlist) :
+                        click_button[key].button(':violet['+str(fvalue)+']', disabled=True, key=key)
+                    elif key in st.session_state.clicklist:
+                        click_button[key].button(':blue['+str(fvalue)+']', disabled=True, key=key)
+                    elif key in st.session_state.BOlist:
+                        click_button[key].button(':red['+str(fvalue)+']', disabled=True, key=key)
+                    elif key in st.session_state.initlist:
+                        click_button[key].button(':green['+str(fvalue)+']', disabled=True, key=key)
+                    else:
+                        click_button[key].button(str(fvalue), disabled=True, key=key)
+                # when still guessing
                 else:
-                    click_button[key].button('X', on_click=change_icon, args=[key,x_true, bounds, max_bound, min_dist, max_dist,x_train_bo,x_train_usr,y_train_bo,y_train_usr,func], key=key)
+                    if key+'_status' in st.session_state:
+                        fvalue = st.session_state.numberlist[key]
+                        if key in st.session_state.initlist:
+                            click_button[key].button(':green['+str(fvalue)+']', disabled=True, key=key)
+                        else:
+                            click_button[key].button(':blue['+str(fvalue)+']', disabled=True, key=key)
+                    else:
+                        click_button[key].button('X', on_click=change_icon, args=[key,x_true, bounds, max_bound, min_dist, max_dist,x_train_bo,x_train_usr,y_train_bo,y_train_usr,func], key=key)
 
     if st.session_state.tries==budget:
         # show results

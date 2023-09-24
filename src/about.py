@@ -14,9 +14,9 @@ def main():
         Credits: 
         - 📔 UI/UX: You Peng & Joel Paulson
         - ❤️ Frontend Developer: You Peng
-        - 🌱 Backend Developer: Farshud
-        - 🌍 Communication: Ting
-        - 💬 Logistics: Akshay
+        - 🌱 Backend Developer: Joel Paulson & Farshud Sorourifar
+        - 🌍 Communication: Ting-Yeh Chen
+        - 💬 Logistics: Kevin Lu & Akshay Kudva
 
         ##### Reach Us
 
