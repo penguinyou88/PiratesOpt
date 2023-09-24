@@ -104,19 +104,6 @@ def opt_aqf_fun(model, bounds, x_train,max_bound):
 
   return x_new
 
-
-def BO_step( x_train, y_train, x_true,bounds,min_dist,max_dist,max_bound=10):
-  model = get_trained_GP(x_train.double(), y_train.double())
-  x_new = opt_aqf_fun( model , bounds.double(),x_train,max_bound)
-  y_new = func(x_new, x_true, max_bound, min_dist, max_dist).double()
-  return x_new, y_new, x_train, y_train
-
-
-# def func(x, x_true):
-#     x = torch.round(x)
-#     return torch.round(torch.sqrt(torch.sum((x- x_true)**2, axis=1)).reshape(-1,1))
-
-
 def distance(x, x_true):
   return torch.round( 10 * torch.sqrt( torch.sum((x - x_true)**2, dim=1) ) )
 
@@ -139,11 +126,26 @@ def return_scaling(x_true,N):
     # F = f_grid.detach().numpy().reshape(N, N)
 
     return min_dist, max_dist
- 
 
 # function evaluation
-def func(x, x_true, N, min_dist, max_dist):
+def func1(x, x_true, N, min_dist, max_dist):
     x = torch.round(x)
     f = (0 - 99)/(max_dist - min_dist) * (distance(x, x_true) - min_dist) + 99
     
     return torch.round(f)
+
+def func2(x, x_true, N, min_dist, max_dist):
+    x = torch.round(x)
+    f = (0 - 99)/(max_dist - min_dist) * (distance(x, x_true) - min_dist) + 99
+    
+    return torch.round(f)
+
+def BO_step( x_train, y_train, x_true,bounds,min_dist,max_dist,max_bound=10, func=func1):
+  model = get_trained_GP(x_train.double(), y_train.double())
+  x_new = opt_aqf_fun( model , bounds.double(),x_train,max_bound)
+  y_new = func(x_new, x_true, max_bound, min_dist, max_dist).double()
+  return x_new, y_new, x_train, y_train
+
+
+ 
+
