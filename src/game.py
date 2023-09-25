@@ -3,7 +3,7 @@ import random
 import json
 import os
 import torch
-from src.utils import BO_step, func1, func2, return_scaling
+from src.utils import BO_step, func1, func2, return_scaling1, return_scaling2, generate_xtrue1, generate_xtrue2
 
 
 def init(bound: int = 10, post_init=False):
@@ -58,9 +58,9 @@ def change_icon(key, x_true, bounds, max_bound, min_dist, max_dist,x_train_bo,x_
     update_BO_guess(x_new_usr,f,x_train_bo,x_train_usr,y_train_bo,y_train_usr,x_true,max_bound,bounds,min_dist,max_dist,func)
 
 
-def initialize_game(max_bound, func, n_init=3):
+def initialize_game(max_bound, func, return_scaling, generate_xtrue, n_init=3):
     # initialize a new game
-    x_true = torch.ceil(torch.rand(1, 2)*max_bound)
+    x_true = generate_xtrue(max_bound)
 
     bounds = [[0]*2, [max_bound]*2]
     bounds = torch.tensor(bounds)
@@ -101,6 +101,11 @@ def main(level='level1'):
             '''
         )
         func = func1
+        return_scaling = return_scaling1
+        generate_xtrue = generate_xtrue1
+        init_budget = 3
+        init_n0_guess = 5
+
     else:
         st.write(
             '''
@@ -108,7 +113,10 @@ def main(level='level1'):
             '''
         )
         func = func2
-
+        return_scaling = return_scaling2
+        generate_xtrue = generate_xtrue2
+        init_budget = 3
+        init_n0_guess = 5
 
     if 'win' not in st.session_state:
         init()
@@ -124,15 +132,15 @@ def main(level='level1'):
             key='bound',
             on_change=restart,
         )
-        budget = st.number_input('Number of Gueses',value=3, min_value=1, max_value=5)
-        n0_guess = st.number_input('Initial Value Provided',value=5, min_value=1, max_value=10)
+        budget = st.number_input('Number of Gueses',value=init_budget, min_value=1, max_value=5)
+        n0_guess = st.number_input('Initial Value Provided',value=init_n0_guess, min_value=1, max_value=10)
 
     # user name
     user_name = st.text_input('Player Name:','RandomPlayer1')
 
     # initialize game
     if st.session_state.init_flag:
-        x_train_bo,x_train_usr,y_train_bo,y_train_usr,x_true,bounds,min_dist, max_dist = initialize_game(max_bound,func, n_init=n0_guess)
+        x_train_bo,x_train_usr,y_train_bo,y_train_usr,x_true,bounds,min_dist, max_dist = initialize_game(max_bound,func,return_scaling,generate_xtrue,n_init=n0_guess)
         st.session_state.x_train_bo = x_train_bo
         st.session_state.x_train_usr = x_train_usr
         st.session_state.y_train_bo = y_train_bo
@@ -143,9 +151,8 @@ def main(level='level1'):
         st.session_state.max_dist = max_dist
         st.session_state.init_flag = False
 
-
     # number of guesses
-    st.write("Number of Guesses used: ", st.session_state.tries)
+    st.write("Number of Guesses Used: ", st.session_state.tries)
 
     # retrive session data
     x_train_bo = st.session_state.x_train_bo
@@ -196,7 +203,7 @@ def main(level='level1'):
         st.info('All guesses are used!', icon="ℹ️")
         st.write('His Score is %i '%(y_train_bo.max().item()))
         st.write('Your Score is %i '%(y_train_usr.max().item()))
-        if y_train_bo.max() >= y_train_usr.max():
+        if y_train_bo.max() > y_train_usr.max():
             st.error('Sorry, but Thomas Bayes won this round!', icon="🚨")
         else:
             # player wins!

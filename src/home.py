@@ -5,23 +5,23 @@ def main():
     st.markdown(
         '''
         <h1 align="center">
-            Welcome to the Pirates Treasure Hunt Game 👋
+            Welcome to The <br/> 
+            Pirates Treasure Hunt Game 👋
         </h1>
 
         ---
 
         #### About the Game
 
-        Click the "Treasure Hunt Game" button to begin play the game! 
-
-        Thomas Bayes, the multi-armed bandit has a special treasure locator, given enough clues, he can find the biggest treasure (💠). 
+        A lost civilization hid a large number of diamonds of different sizes over some plots of land. You have been tasked by the King of your tribe to find the biggest diamond to help the tribe get enough supplies for the winter. However, a pirate tribe, captained by the famous pirate Thomas Bayes, is competing against you. Can you defeat the Bayes crew and find the bigger dimaond?
         
-        Using your scientific power, you will be able to find the largest diamond too!
+        * There are two levels corresponding to more difficult types of land. 
+        * You and the Bayes crew are given prior information about diamond sizes in random locations. 
+        * You only have a few guesses to try and improve upon the starting values. 
+        * You only win if you get a higher value than the Bayes crew. 
 
-        Can you find the bigger 💠 than what Thomas Bayes finds?
+        Click "Treasure Hunt Game" on the left to start playing. 
 
-        There are 2 levels of the game, come and try it out and see if you can beat him at both levels!
-        
         ''',
         unsafe_allow_html=True,
     )
