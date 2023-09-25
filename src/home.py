@@ -18,7 +18,7 @@ def main():
         * There are two levels corresponding to more difficult types of land. 
         * You and the Bayes crew are given prior information about diamond sizes in random locations. 
         * You only have a few guesses to try and improve upon the starting values. 
-        * You only win if you get a higher value than the Bayes crew. 
+        * You win if you get the same or higher value than the Bayes crew. 
 
         Click "Treasure Hunt Game" on the left to start playing. 
 
@@ -26,7 +26,9 @@ def main():
         unsafe_allow_html=True,
     )
 
-    st.image('./src/assets/Bayes.png',width=250)
+    col1, col2, col3 = st.columns([1.9,4,1])
+    with col2:
+        st.image('./src/assets/Bayes.png',width=300)
 
 
 if __name__ == '__main__':
