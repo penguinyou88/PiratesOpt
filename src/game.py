@@ -68,10 +68,18 @@ def initialize_game(max_bound, func, return_scaling, generate_xtrue, n_init=3):
     # get scalinge
     min_dist, max_dist = return_scaling(x_true,max_bound)
 
-    #get init samples
+    # get init samples
     x_train = torch.ceil(torch.rand(n_init, 2)*max_bound)
     y_train = func(x_train, x_true, max_bound, min_dist, max_dist)
     y_train = y_train.reshape(-1,1)
+
+    # check that none of the samples equal 99, if so resample
+    indices = torch.where(y_train == 99)[0]
+    while indices.any():
+        x_train = torch.ceil(torch.rand(n_init, 2)*max_bound)
+        y_train = func(x_train, x_true, max_bound, min_dist, max_dist)
+        y_train = y_train.reshape(-1,1)
+        indices = torch.where(y_train == 99)[0]
 
     x_train_bo  = x_train
     x_train_usr = x_train
@@ -103,8 +111,8 @@ def main(level='level1'):
         func = func1
         return_scaling = return_scaling1
         generate_xtrue = generate_xtrue1
-        init_budget = 3
-        init_n0_guess = 5
+        init_budget = 1
+        init_n0_guess = 10
 
     else:
         st.write(
@@ -112,9 +120,9 @@ def main(level='level1'):
             # 🏴‍☠️ Treasure Hunt Game: Level 2
             '''
         )
-        func = func2
-        return_scaling = return_scaling2
-        generate_xtrue = generate_xtrue2
+        func = func1
+        return_scaling = return_scaling1
+        generate_xtrue = generate_xtrue1
         init_budget = 3
         init_n0_guess = 5
 
@@ -133,7 +141,7 @@ def main(level='level1'):
             on_change=restart,
         )
         budget = st.number_input('Number of Gueses',value=init_budget, min_value=1, max_value=5)
-        n0_guess = st.number_input('Initial Value Provided',value=init_n0_guess, min_value=1, max_value=10)
+        n0_guess = st.number_input('Initial Value Provided',value=init_n0_guess, min_value=1, max_value=15)
 
     # user name
     user_name = st.text_input('Player Name:','RandomPlayer1')

@@ -32,12 +32,12 @@ from botorch.optim import optimize_acqf
 
 #Get Periodic, regular, and Heteroskedastic GP models
 
-def get_trained_GP(X,Y,Yvar = None, kernel_type='RBF' ):
+def get_trained_GP(X,Y,Yvar = None, kernel_type='RBF'):
 
     X_torch = X
     f_X_torch = Y.flatten()
 
-    nu = 2.5 # Parameter for the
+    nu = 2.5 # Parameter for the Matern kernel
 
     input_dim = X_torch.shape[1]
     output_dim = Y.shape[1]
@@ -79,7 +79,6 @@ def get_trained_GP(X,Y,Yvar = None, kernel_type='RBF' ):
                            outcome_transform=outcome_transform)
 
       # call the training procedure
-
       model.outcome_transform.eval()
       mll = gpytorch.mlls.ExactMarginalLogLikelihood(model.likelihood, model)
       fit_gpytorch_model(mll)
@@ -138,18 +137,34 @@ def func1(x, x_true, N, min_dist, max_dist):
     return torch.round(f)
 
 def generate_xtrue2(N):
-  x_true1 = torch.ceil(torch.rand(1, 2)*N)
-  x_true2 = torch.ceil(torch.rand(1, 2)*N)
-  x_true3 = torch.ceil(torch.rand(1, 2)*N)
-  s1 = 2*torch.rand(1,1) + 1
-  s2 = 2*torch.rand(1,1) + 1
-  s3 = 2*torch.rand(1,1) + 1
-  return [x_true1, x_true2, x_true3, s1, s2, s3]
+  Ndata = 30
+  X = torch.ceil(N*torch.rand((Ndata,2)))
+  covar = ScaleKernel(RBFKernel(ard_num_dims=2))
+  covar.base_kernel.lengthscale = 3
+  covar.outputscale = 10
+  K = covar(X, X, diag=True).detach().unsqueeze(-1)
+  Y = torch.sqrt(K) * torch.randn((Ndata,1))
+
+  return [X, Y]
 
 def distance2(x, x_true):
-  x_true1, x_true2, x_true3 = x_true[0], x_true[1], x_true[2]
-  s1, s2, s3 = x_true[3], x_true[4], x_true[4]
-  return torch.round( s1*torch.sqrt( torch.sum((x - x_true1)**2, dim=1) ) ) + s2*torch.round( torch.sqrt( torch.sum((x - x_true2)**2, dim=1) ) ) + s3*torch.round( torch.sqrt( torch.sum((x - x_true3)**2, dim=1) ) )
+  X, Y = x_true
+
+  covar = ScaleKernel(RBFKernel(ard_num_dims=2))
+  covar.base_kernel.lengthscale = 3
+  covar.outputscale = 10
+  likelihood = GaussianLikelihood(noise_constraint=Interval(lower_bound=1e-5, upper_bound=1e-3))
+
+  standardize = Standardize(m=1)
+  outcome_transform = standardize
+
+  model = SingleTaskGP(train_X=X, train_Y=Y, covar_module=covar, likelihood=likelihood, outcome_transform=outcome_transform)
+  model.eval()
+
+  with torch.no_grad():
+    posterior = model(x)
+
+  return torch.round( posterior.mean.detach() )
 
 def return_scaling2(x_true,N):
     # get min, max distance
